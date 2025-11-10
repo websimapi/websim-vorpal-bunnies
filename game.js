@@ -1,5 +1,9 @@
 import { getRandomInt } from './utils.js';
 
+const SAVE_KEY = 'vorpalBunniesSaveData';
+let saveInterval = 5; // seconds
+let timeSinceSave = 0;
+
 export let gameState = {
     bunny: {
         name: "Binky",
@@ -31,6 +35,60 @@ export let gameState = {
     },
     log: ["Your adventure begins!"],
 };
+
+function saveGame() {
+    try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
+    } catch (e) {
+        console.error("Failed to save game state:", e);
+    }
+}
+
+function deepMerge(target, source) {
+    for (const key in source) {
+        if (source.hasOwnProperty(key)) {
+            if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                if (!target[key]) {
+                    Object.assign(target, { [key]: {} });
+                }
+                deepMerge(target[key], source[key]);
+            } else {
+                Object.assign(target, { [key]: source[key] });
+            }
+        }
+    }
+    return target;
+}
+
+function loadGame() {
+    try {
+        const savedStateJSON = localStorage.getItem(SAVE_KEY);
+        if (!savedStateJSON) return;
+
+        const savedState = JSON.parse(savedStateJSON);
+
+        // Use a deep merge to preserve new properties from default state
+        deepMerge(gameState, savedState);
+
+        // Reset transient state
+        gameState.combat.progress = 0;
+        gameState.monster = null;
+
+        // Ensure stats are correct after loading upgrades and level
+        recalculateBunnyStats();
+
+        // Make sure bunny has HP, especially if loaded from an old save
+        if (!gameState.bunny.hp) {
+             gameState.bunny.hp = gameState.bunny.stats.maxHp;
+        }
+
+        gameState.log.unshift("Game loaded successfully!");
+
+    } catch (e) {
+        console.error("Failed to load game state:", e);
+        localStorage.removeItem(SAVE_KEY); // Clear corrupted save
+    }
+}
 
 const MONSTER_ADJECTIVES = ["Grassy", "Slimy", "Fuzzy", "Angry", "Tiny"];
 const MONSTER_NOUNS = ["Slime", "Squeaker", "Muncher", "Crawler", "Hopper"];
@@ -99,6 +157,7 @@ export function purchaseUpgrade(upgradeKey) {
             gameState.bunny.hp = gameState.bunny.stats.maxHp;
         }
         addLog(`Upgraded ${upgrade.name} to level ${upgrade.level}!`);
+        saveGame(); // Save after a purchase
         return true;
     }
     return false;
@@ -127,8 +186,16 @@ export function update(deltaTime) {
 
         generateMonster();
     }
+
+    // Periodic save
+    timeSinceSave += deltaTime;
+    if (timeSinceSave >= saveInterval) {
+        saveGame();
+        timeSinceSave = 0;
+    }
 }
 
 // Initialize
+loadGame();
 recalculateBunnyStats();
 generateMonster();
