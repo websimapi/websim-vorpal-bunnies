@@ -159,8 +159,10 @@ main {
     border-bottom: 1px solid #333;
 }
 
-#upgrades-container button {
-    display: block;
+.upgrade-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
@@ -172,14 +174,149 @@ main {
     text-align: left;
 }
 
-#upgrades-container button:hover:not(:disabled) {
+.upgrade-button:hover:not(:disabled) {
     background-color: var(--button-hover-bg);
 }
 
-#upgrades-container button:disabled {
+.upgrade-button:disabled {
     background-color: #333;
     color: #888;
     cursor: not-allowed;
+}
+
+.upgrade-button .cost {
+    font-weight: bold;
+    color: var(--highlight-color);
+}
+
+#ai-customization-section {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+#ai-customization-section h3 {
+    margin-top: 0;
+}
+
+#ai-prompt {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 60px;
+    background-color: #1e1e1e;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 10px;
+    resize: vertical;
+}
+
+#generate-ai-upgrade-btn {
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(45deg, var(--highlight-color), #ffb74d);
+    color: #1a1a1a;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+#generate-ai-upgrade-btn:hover {
+    transform: scale(1.02);
+}
+
+#custom-upgrades-container .upgrade-button {
+    background-color: #3a2e00;
+    border-color: var(--highlight-color);
+}
+
+#custom-upgrades-container .upgrade-button:hover:not(:disabled) {
+    background-color: #5c4800;
+}
+
+#custom-upgrades-container .upgrade-button.purchased {
+    background-color: #2a3a2a;
+    border-color: #4caf50;
+    cursor: default;
+}
+
+#custom-upgrades-container .upgrade-button.purchased .cost {
+    color: #4caf50;
+}
+
+#custom-upgrades-container .upgrade-button.equipped {
+    border-color: #2196F3; /* Blue border to show it's active */
+    background-color: #2a3d4a;
+}
+
+#custom-upgrades-container .upgrade-button.equipped .cost {
+    color: #64b5f6;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: var(--panel-bg);
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+}
+
+.modal-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.modal-buttons button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+#confirm-generation-btn {
+    background-color: var(--progress-bar-bg);
+    color: white;
+}
+
+#cancel-generation-btn, #close-modal-btn {
+    background-color: var(--button-bg);
+    color: var(--text-color);
+}
+
+.loader {
+    border: 4px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 4px solid var(--highlight-color);
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 #upgrades-container button .cost {

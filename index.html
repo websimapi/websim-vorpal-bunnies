@@ -41,8 +41,16 @@
                     <p>Attack: <span id="bunny-attack">1</span></p>
                     <p>Defense: <span id="bunny-defense">0</span></p>
                 </div>
+                <div id="ai-customization-section">
+                    <h3>AI Customization</h3>
+                    <textarea id="ai-prompt" placeholder="Describe an item for your bunny... e.g., 'a cool pirate hat' or 'a flaming sword'"></textarea>
+                    <button id="generate-ai-upgrade-btn">Generate Upgrade Idea</button>
+                </div>
                 <div id="upgrades-section">
                     <h3>Upgrades</h3>
+                    <div id="custom-upgrades-container">
+                        <!-- AI Upgrades will appear here -->
+                    </div>
                     <div id="upgrades-container">
                         <!-- Upgrades will be dynamically added here -->
                     </div>
@@ -80,6 +88,15 @@
                 </div>
             </div>
         </main>
+
+        <div id="ai-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div id="modal-body">
+                    <!-- Modal content goes here -->
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script type="module" src="main.js"></script>

@@ -1,4 +1,5 @@
 import { purchaseUpgrade } from './game.js';
+import { purchaseAndEquip, toggleEquipUpgrade } from './gemini_character_creator.js';
 import { playSound } from './sounds.js';
 
 const elements = {
@@ -11,6 +12,7 @@ const elements = {
     bunnyMaxHp: document.getElementById('bunny-max-hp'),
     bunnyAttack: document.getElementById('bunny-attack'),
     bunnyDefense: document.getElementById('bunny-defense'),
+    bunnyPortrait: document.querySelector('.bunny-portrait'),
     zoneName: document.getElementById('zone-name'),
     monstersToBoss: document.getElementById('monsters-to-boss'),
     monsterName: document.getElementById('monster-name'),
@@ -20,6 +22,9 @@ const elements = {
     combatProgressBar: document.getElementById('combat-progress-bar'),
     logContainer: document.getElementById('log-container'),
     upgradesContainer: document.getElementById('upgrades-container'),
+    customUpgradesContainer: document.getElementById('custom-upgrades-container'),
+    modal: document.getElementById('ai-modal'),
+    modalBody: document.getElementById('modal-body'),
 };
 
 let lastLogLength = 0;
@@ -55,10 +60,92 @@ function updateUpgradeButton(state, key) {
     button.querySelector('.cost').textContent = `${upgrade.cost} CS`;
 }
 
+export function showModal(content) {
+    elements.modalBody.innerHTML = content;
+    elements.modal.style.display = 'flex';
+}
+
+export function hideModal() {
+    elements.modal.style.display = 'none';
+}
+
+export function updateModalContent(content) {
+    elements.modalBody.innerHTML = content;
+}
+
+function updateCustomUpgradeButtons(state) {
+    const upgrades = state.customUpgrades || [];
+    const container = elements.customUpgradesContainer;
+
+    // Basic diffing to avoid recreating elements unnecessarily
+    const existingButtons = new Map();
+    container.querySelectorAll('.upgrade-button').forEach(btn => {
+        existingButtons.set(btn.dataset.upgradeId, btn);
+    });
+
+    const newIds = new Set();
+
+    upgrades.forEach(upgrade => {
+        newIds.add(upgrade.itemId);
+        let button = existingButtons.get(upgrade.itemId);
+
+        if (!button) {
+            button = document.createElement('button');
+            button.className = 'upgrade-button';
+            button.dataset.upgradeId = upgrade.itemId;
+            button.onclick = () => {
+                playSound('ui_click');
+                if (!upgrade.purchased) {
+                    purchaseAndEquip(upgrade);
+                } else {
+                    toggleEquipUpgrade(upgrade);
+                }
+            };
+            container.appendChild(button);
+        }
+
+        const isEquipped = state.bunny.equippedCustomUpgradeId === upgrade.itemId;
+        
+        // Determine the cost to display/charge
+        const equippedUpgradeId = state.bunny.equippedCustomUpgradeId;
+        const equippedUpgrade = state.customUpgrades.find(u => u.itemId === equippedUpgradeId);
+        const baseCost = equippedUpgrade ? equippedUpgrade.cost : 0;
+        const displayCost = upgrade.cost - (isEquipped ? 0 : baseCost);
+
+        const costText = upgrade.purchased 
+            ? (isEquipped ? "Equipped" : "Equip") 
+            : `${displayCost} CS`;
+        
+        button.innerHTML = `
+            <span class="name">${upgrade.itemName} (Value: ${upgrade.cost})</span>
+            <span class="cost">${costText}</span>
+        `;
+        
+        button.disabled = !upgrade.purchased && state.resources.carrotShards < displayCost;
+        
+        button.classList.remove('purchased', 'equipped');
+        if (upgrade.purchased) {
+            button.classList.add('purchased');
+        }
+        if (isEquipped) {
+            button.classList.add('equipped');
+        }
+    });
+
+    // Remove old buttons
+    existingButtons.forEach((button, id) => {
+        if (!newIds.has(id)) {
+            button.remove();
+        }
+    });
+}
+
 export function render(state) {
+    window.gameState = state; // Make state globally accessible for button disabling
     elements.carrotShards.textContent = state.resources.carrotShards;
 
     // Bunny Info
+    elements.bunnyPortrait.src = state.bunny.currentPortraitUrl;
     elements.bunnyName.textContent = state.bunny.name;
     elements.bunnyLevel.textContent = state.bunny.level;
     elements.xpText.textContent = `${state.bunny.xp} / ${state.bunny.xpToNextLevel}`;
@@ -96,4 +183,7 @@ export function render(state) {
         }
         updateUpgradeButton(state, key);
     }
+
+    // Custom Upgrades
+    updateCustomUpgradeButtons(state);
 }
