@@ -1,4 +1,5 @@
 import { getRandomInt } from './utils.js';
+import { playSound } from './sounds.js';
 
 const SAVE_KEY = 'vorpalBunniesSaveData';
 let saveInterval = 5; // seconds
@@ -133,6 +134,7 @@ function levelUpBunny() {
         gameState.bunny.hp = gameState.bunny.stats.maxHp; // Full heal on level up
 
         addLog(`Ding! ${gameState.bunny.name} reached level ${gameState.bunny.level}!`);
+        playSound('level_up');
     }
 }
 
@@ -157,6 +159,7 @@ export function purchaseUpgrade(upgradeKey) {
             gameState.bunny.hp = gameState.bunny.stats.maxHp;
         }
         addLog(`Upgraded ${upgrade.name} to level ${upgrade.level}!`);
+        playSound('upgrade');
         saveGame(); // Save after a purchase
         return true;
     }
@@ -176,6 +179,7 @@ export function update(deltaTime) {
         // Combat resolution (simplified)
         const monster = gameState.monster;
         addLog(`${gameState.bunny.name} defeated a ${monster.name}!`);
+        playSound('monster_defeat');
 
         gameState.resources.carrotShards += monster.carrotValue;
         gameState.bunny.xp += monster.xpValue;

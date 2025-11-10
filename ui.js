@@ -1,4 +1,5 @@
 import { purchaseUpgrade } from './game.js';
+import { playSound } from './sounds.js';
 
 const elements = {
     carrotShards: document.getElementById('carrot-shards'),
@@ -28,7 +29,10 @@ function createUpgradeButton(state, key) {
     const button = document.createElement('button');
     button.id = `upgrade-${key}`;
     button.className = 'upgrade-button';
-    button.onclick = () => purchaseUpgrade(key);
+    button.onclick = () => {
+        playSound('ui_click');
+        purchaseUpgrade(key);
+    };
 
     const nameSpan = document.createElement('span');
     nameSpan.className = 'name';

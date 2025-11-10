@@ -1,5 +1,6 @@
 import { gameState, update } from './game.js';
 import { render } from './ui.js';
+import { loadAllSounds } from './sounds.js';
 
 let lastTime = 0;
 
@@ -17,4 +18,6 @@ function gameLoop(timestamp) {
 }
 
 // Start the game loop
-requestAnimationFrame(gameLoop);
+loadAllSounds().then(() => {
+    requestAnimationFrame(gameLoop);
+});
